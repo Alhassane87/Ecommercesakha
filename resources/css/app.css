@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --sakha-primary: #0B2545;
+    --sakha-accent: #F8B803;
+    --bg: #FDFDFC;
+    --text: #1b1b18;
+    --theme-page-bg: linear-gradient(to bottom right, #f8fafc, #eef2ff);
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    background: var(--theme-page-bg);
+    color: var(--text);
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+html.dark body {
+    --theme-page-bg: linear-gradient(to bottom right, #111827, #1f2937);
+    --text: #e5e7eb;
+}
+
+.theme-toggle-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border-radius: 0.85rem;
+    border: 1px solid rgba(148, 163, 184, 0.38);
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(8px);
+}
+
+html.dark .theme-toggle-group {
+    border-color: rgba(71, 85, 105, 0.62);
+    background: rgba(15, 23, 42, 0.78);
+}
+
+.theme-toggle-btn {
+    width: 2.2rem;
+    height: 2.2rem;
+    border: 0;
+    border-radius: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    background: transparent;
+    transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+    color: #0f172a;
+    background: rgba(148, 163, 184, 0.2);
+}
+
+html.dark .theme-toggle-btn {
+    color: #cbd5e1;
+}
+
+html.dark .theme-toggle-btn:hover {
+    color: #ffffff;
+    background: rgba(148, 163, 184, 0.18);
+}
+
+.theme-toggle-btn.is-active {
+    color: #ffffff;
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 55%, #ef4444 100%);
+    box-shadow: 0 10px 18px -12px rgba(239, 68, 68, 0.85);
+}
+
+html.dark .theme-toggle-btn.is-active[data-theme-toggle='dark'] {
+    background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+    box-shadow: 0 10px 18px -12px rgba(99, 102, 241, 0.95);
+}
+
+/* Slightly better default responsiveness for media and tables */
+img,
+svg,
+video,
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 640px) {
+    .max-w-7xl,
+    .max-w-6xl,
+    .max-w-5xl,
+    .max-w-4xl {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}

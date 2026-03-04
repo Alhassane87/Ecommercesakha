@@ -1,0 +1,38 @@
+# ==============================================
+# CONFIGURATION CHATBOT + WHATSAPP + CHIFFREMENT
+# ==============================================
+# Ajoutez ces lignes à votre fichier .env
+
+# ---------- CHATBOT CONFIGURATION ----------
+CHATBOT_ENABLED=true
+# Provider: 'gemini' (gratuit) ou 'openai' (payant)
+CHATBOT_PROVIDER=gemini
+
+# Clé API Google Gemini (GRATUIT)
+# Obtenez-la sur: https://makersuite.google.com/app/apikey
+GEMINI_API_KEY=
+
+# Clé API OpenAI (PAYANT - Alternative)
+# Obtenez-la sur: https://platform.openai.com/api-keys
+OPENAI_API_KEY=
+
+# ---------- WHATSAPP CONFIGURATION ----------
+WHATSAPP_ENABLED=false
+# URL API Meta WhatsApp
+WHATSAPP_API_URL=https://graph.facebook.com/v18.0
+
+# Token d'accès WhatsApp Business
+# Obtenez-le dans votre app Meta: https://developers.facebook.com/
+WHATSAPP_ACCESS_TOKEN=
+
+# ID du numéro de téléphone WhatsApp Business
+WHATSAPP_PHONE_NUMBER_ID=
+
+# Token de vérification pour le webhook
+# Utilisez une chaîne aléatoire sécurisée
+WHATSAPP_VERIFY_TOKEN=sakha_webhook_verify_token_123456
+
+# ---------- CHIFFREMENT URL ----------
+# Le chiffrement utilise automatiquement APP_KEY
+# Assurez-vous que APP_KEY est défini :
+# APP_KEY=base64:VotreCléDeDéchiffrement...
