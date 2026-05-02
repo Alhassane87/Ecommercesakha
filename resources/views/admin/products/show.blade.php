@@ -54,6 +54,16 @@
                     <p>Aucune image</p>
                 </div>
             @endif
+
+            @if($product->hasUsageVideo())
+                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <h3 class="text-base font-semibold mb-3">Video de demonstration</h3>
+                    <video controls preload="metadata" class="w-full rounded-xl bg-black shadow-lg">
+                        <source src="{{ $product->getUsageVideoUrl() }}">
+                        Votre navigateur ne supporte pas la lecture video.
+                    </video>
+                </div>
+            @endif
         </div>
 
         <!-- Informations du produit -->

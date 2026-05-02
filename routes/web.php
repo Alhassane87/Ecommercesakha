@@ -79,6 +79,10 @@ Route::middleware(['auth', EnsureUserIsAdmin::class])->prefix('admin')->group(fu
     
     // Gestion des promotions
     Route::resource('promotions', AdminPromotionController::class)->names('admin.promotions');
+    Route::delete('ad-campaigns/{adCampaign}/images/{image}', [AdCampaignController::class, 'destroyImage'])
+        ->name('admin.ad-campaigns.images.destroy');
+    Route::post('ad-campaigns/{adCampaign}/images/{image}/primary', [AdCampaignController::class, 'setPrimaryImage'])
+        ->name('admin.ad-campaigns.images.primary');
     Route::resource('ad-campaigns', AdCampaignController::class)
         ->except(['show'])
         ->parameters(['ad-campaigns' => 'adCampaign'])
@@ -107,9 +111,7 @@ Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallb
 // Cart routes - GET et POST sur la même route /cart
 Route::match(['GET', 'POST'], '/cart', [CartController::class, 'index'])->name('cart.index');
 // Backward-compatible endpoint used by older frontend scripts.
-Route::post('/cart/add', [CartController::class, 'index'])
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])
-    ->name('cart.add');
+Route::post('/cart/add', [CartController::class, 'index'])->name('cart.add');
 Route::patch('/cart/{item}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{item}', [CartController::class, 'remove'])->name('cart.remove');
 
@@ -150,43 +152,3 @@ Route::post('/webhooks/{provider}', [WebhookController::class, 'generic']);
 
 Route::post('/chatbot/message', [ChatbotController::class, 'sendMessage'])->name('chatbot.message');
 Route::get('/chatbot/history', [ChatbotController::class, 'getHistory'])->name('chatbot.history');
-
-// Debug routes - temporary helpers to diagnose product update issues
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
-
-Route::get('/debug-ping', function () {
-    try {
-        File::append(storage_path('debug_update.txt'), now()->toDateTimeString() . " | ping\n");
-    } catch (\Exception $e) {
-        // ignore
-    }
-    return response('ok', 200);
-});
-
-Route::post('/debug-update', function (Request $request) {
-    try {
-        File::append(storage_path('debug_update.txt'), now()->toDateTimeString() . " | debug-update called\n");
-        File::append(storage_path('debug_update.txt'), "Headers: " . json_encode($request->headers->all()) . "\n");
-        File::append(storage_path('debug_update.txt'), "Cookies: " . json_encode($request->cookies->all()) . "\n");
-        File::append(storage_path('debug_update.txt'), "Data: " . json_encode($request->all()) . "\n\n---\n\n");
-    } catch (\Exception $e) {
-        // ignore
-    }
-    return response('debug ok', 200);
-})->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
-
-// Temporary debug endpoint to capture raw POST body + headers for cart requests
-Route::post('/debug-cart', function (Request $request) {
-    try {
-        $raw = $request->getContent();
-        $entry = now()->toDateTimeString() . " | debug-cart called\n";
-        $entry .= "Headers: " . json_encode($request->headers->all()) . "\n";
-        $entry .= "Cookies: " . json_encode($request->cookies->all()) . "\n";
-        $entry .= "RawBody: " . $raw . "\n\n---\n\n";
-        File::append(storage_path('logs/cart_debug.txt'), $entry);
-    } catch (\Exception $e) {
-        // ignore
-    }
-    return response('debug-cart ok', 200);
-})->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);

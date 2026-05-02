@@ -41,6 +41,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         DB::beginTransaction();
+        $storedUsageVideoPath = null;
 
         try {
             // Validation principale
@@ -55,6 +56,7 @@ class ProductController extends Controller
                 'stock' => 'nullable|integer|min:0',
                 'images' => 'nullable|array',
                 'images.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,heic,heif,avif|max:5120',
+                'usage_video' => 'nullable|file|mimes:mp4,mov,webm,ogg,m4v|max:51200',
 
                 // Variations
                 'variations' => 'nullable|array',
@@ -102,6 +104,11 @@ class ProductController extends Controller
 
             if (Schema::hasColumn('products', 'discount_price')) {
                 $productPayload['discount_price'] = $resolvedDiscountPrice;
+            }
+
+            if (Schema::hasColumn('products', 'usage_video_path')) {
+                $storedUsageVideoPath = $this->storeUploadedUsageVideo($request);
+                $productPayload['usage_video_path'] = $storedUsageVideoPath;
             }
 
             $product = Product::create($productPayload);
@@ -170,9 +177,15 @@ class ProductController extends Controller
 
         } catch (ValidationException $e) {
             DB::rollBack();
+            if ($storedUsageVideoPath) {
+                $this->deleteStoredUsageVideo($storedUsageVideoPath);
+            }
             return back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($storedUsageVideoPath) {
+                $this->deleteStoredUsageVideo($storedUsageVideoPath);
+            }
             Log::error('Erreur creation produit', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -218,6 +231,9 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         DB::beginTransaction();
+        $storedUsageVideoPath = null;
+        $previousUsageVideoPath = $product->usage_video_path;
+        $removeUsageVideo = $request->boolean('remove_usage_video');
 
         try {
             $validator = validator($request->all(), [
@@ -231,6 +247,8 @@ class ProductController extends Controller
                 'stock' => 'nullable|integer|min:0',
                 'images' => 'nullable|array',
                 'images.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,heic,heif,avif|max:5120',
+                'usage_video' => 'nullable|file|mimes:mp4,mov,webm,ogg,m4v|max:51200',
+                'remove_usage_video' => 'nullable|boolean',
 
                 // Variations
                 'variations' => 'nullable|array',
@@ -259,6 +277,16 @@ class ProductController extends Controller
 
             if (Schema::hasColumn('products', 'discount_price')) {
                 $payload['discount_price'] = $resolvedDiscountPrice;
+            }
+
+            if (Schema::hasColumn('products', 'usage_video_path')) {
+                $storedUsageVideoPath = $this->storeUploadedUsageVideo($request);
+
+                if ($storedUsageVideoPath) {
+                    $payload['usage_video_path'] = $storedUsageVideoPath;
+                } elseif ($removeUsageVideo) {
+                    $payload['usage_video_path'] = null;
+                }
             }
 
             $product->update($payload);
@@ -317,6 +345,12 @@ class ProductController extends Controller
 
             DB::commit();
 
+            if ($storedUsageVideoPath && $previousUsageVideoPath && $previousUsageVideoPath !== $storedUsageVideoPath) {
+                $this->deleteStoredUsageVideo($previousUsageVideoPath);
+            } elseif ($removeUsageVideo && !$storedUsageVideoPath && $previousUsageVideoPath) {
+                $this->deleteStoredUsageVideo($previousUsageVideoPath);
+            }
+
             if ($imageIssue) {
                 $warnings[] = 'Certaines images n ont pas pu etre enregistrees.';
             }
@@ -335,6 +369,9 @@ class ProductController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($storedUsageVideoPath) {
+                $this->deleteStoredUsageVideo($storedUsageVideoPath);
+            }
             Log::error('Erreur mise a jour produit', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -350,6 +387,10 @@ class ProductController extends Controller
             foreach ($product->images as $image) {
                 if ($image->path) Storage::disk('public')->delete($image->path);
                 $image->delete();
+            }
+
+            if (!empty($product->usage_video_path)) {
+                $this->deleteStoredUsageVideo($product->usage_video_path);
             }
 
             $product->delete();
@@ -542,6 +583,24 @@ class ProductController extends Controller
         return $normalized;
     }
 
+    private function storeUploadedUsageVideo(Request $request): ?string
+    {
+        if (!$request->hasFile('usage_video')) {
+            return null;
+        }
+
+        return $request->file('usage_video')->store('product_videos', 'public');
+    }
+
+    private function deleteStoredUsageVideo(?string $path): void
+    {
+        if (empty($path)) {
+            return;
+        }
+
+        Storage::disk('public')->delete($path);
+    }
+
     private function productValidationMessages(): array
     {
         return [
@@ -550,6 +609,8 @@ class ProductController extends Controller
             'images.*.file' => 'Un des fichiers selectionnes est invalide.',
             'images.*.mimes' => 'Chaque image doit etre au format JPG, PNG, GIF, WEBP, HEIC, HEIF ou AVIF.',
             'images.*.max' => 'Chaque image ne doit pas depasser 5 Mo.',
+            'usage_video.mimes' => 'La video doit etre au format MP4, MOV, WEBM, OGG ou M4V.',
+            'usage_video.max' => 'La video de demonstration ne doit pas depasser 50 Mo.',
             'discount_percent.max' => 'La reduction ne peut pas depasser 99,99%.',
         ];
     }
@@ -559,6 +620,7 @@ class ProductController extends Controller
         return [
             'images' => 'images du produit',
             'images.*' => 'image du produit',
+            'usage_video' => 'video de demonstration',
             'discount_percent' => 'pourcentage de reduction',
             'discount_price' => 'prix promotionnel',
         ];

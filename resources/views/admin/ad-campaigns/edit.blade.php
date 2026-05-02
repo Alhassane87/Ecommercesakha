@@ -33,5 +33,73 @@
             </div>
         </form>
     </div>
+
+    @php
+        $galleryImages = $campaign->images;
+        if ($galleryImages->isEmpty() && !empty($campaign->image_path)) {
+            $galleryImages = collect([(object) ['id' => null, 'path' => $campaign->image_path]]);
+        }
+    @endphp
+
+    @if($galleryImages->isNotEmpty())
+        <div class="mt-6 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">Galerie de la campagne</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        Definissez l'image principale ou supprimez un visuel devenu inutile.
+                    </p>
+                </div>
+                <div class="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                    {{ $galleryImages->count() }} image(s)
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach($galleryImages as $image)
+                    @php
+                        $isPrimary = $campaign->image_path === $image->path;
+                    @endphp
+
+                    <div class="rounded-2xl border {{ $isPrimary ? 'border-emerald-400 ring-2 ring-emerald-200 dark:ring-emerald-900/50' : 'border-gray-200 dark:border-gray-700' }} bg-gray-50 dark:bg-gray-800/40 p-3">
+                        <div class="relative rounded-xl overflow-hidden bg-white dark:bg-gray-900">
+                            <img src="{{ \Illuminate\Support\Facades\Storage::url($image->path) }}"
+                                 alt="{{ $campaign->title }}"
+                                 class="w-full h-48 object-contain">
+
+                            @if($isPrimary)
+                                <span class="absolute left-3 top-3 inline-flex items-center rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                                    Principale
+                                </span>
+                            @endif
+                        </div>
+
+                        @if($image->id)
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                @unless($isPrimary)
+                                    <form method="POST" action="{{ route('admin.ad-campaigns.images.primary', ['adCampaign' => $campaign->id, 'image' => $image->id]) }}">
+                                        @csrf
+                                        <button type="submit"
+                                                class="inline-flex items-center rounded-lg px-3 py-2 bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700">
+                                            Mettre principale
+                                        </button>
+                                    </form>
+                                @endunless
+
+                                <form method="POST" action="{{ route('admin.ad-campaigns.images.destroy', ['adCampaign' => $campaign->id, 'image' => $image->id]) }}" onsubmit="return confirm('Supprimer cette image ?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                            class="inline-flex items-center rounded-lg px-3 py-2 bg-red-600 text-white text-sm font-semibold hover:bg-red-700">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 </div>
 @endsection

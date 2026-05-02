@@ -10,7 +10,15 @@
         <div class="mb-8 rounded-3xl p-6 sm:p-8 text-white shadow-xl" style="background: var(--primary-gradient);">
             <div class="flex items-start justify-between gap-6">
                 <div>
-                    <p class="text-xs uppercase tracking-[0.2em] text-white/80 mb-2">{{ $product->category->name ?? 'Produit' }}</p>
+                    @if($product->category)
+                    <nav class="flex items-center gap-2 text-sm text-white/80 mb-3">
+                        <a href="{{ route('home') }}" class="hover:text-white transition-colors duration-200">Accueil</a>
+                        <i class="fas fa-chevron-right text-[10px]"></i>
+                        <a href="{{ route('categories.show', $product->category->slug) }}" class="hover:text-white transition-colors duration-200">{{ $product->category->name }}</a>
+                        <i class="fas fa-chevron-right text-[10px]"></i>
+                        <span class="text-white font-semibold">{{ $product->name }}</span>
+                    </nav>
+                    @endif
                     <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight">{{ $product->name }}</h1>
                     @php
                         $finalPrice = $product->getFinalPrice();
@@ -37,7 +45,7 @@
 </section>
 
 <div class="max-w-7xl mx-auto p-6">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-100 dark:border-gray-700 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 mb-8">
         <!-- Contenu du produit -->
         <div class="p-6">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -104,6 +112,32 @@
                             @endforeach
                         </div>
                     @endif
+
+                    @if($product->hasUsageVideo())
+                        <div class="rounded-2xl border border-blue-100 dark:border-blue-900/40 bg-white/95 dark:bg-gray-800/95 shadow-lg">
+                            <div class="px-5 py-4 border-b border-blue-100 dark:border-blue-900/40 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 overflow-hidden rounded-t-2xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg">
+                                        <i class="fas fa-play"></i>
+                                    </div>
+                                    <div class="[&>p:first-of-type]:hidden">
+                                        <h2 class="text-lg font-bold text-gray-900 dark:text-white">Comment utiliser ce produit</h2>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">Une video pratique pour aider le client avant l’achat.</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">Une video pratique pour aider le client avant l'achat.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-4 sm:p-5" style="position: relative; pointer-events: none;">
+                                <div style="position: relative; pointer-events: auto;">
+                                    <video controls preload="metadata" style="width: 100%; border-radius: 0.75rem; background-color: black; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); display: block; pointer-events: auto;"
+                                           @if($product->images->first()) poster="{{ Storage::url($product->images->first()->path) }}" @endif>
+                                        <source src="{{ $product->getUsageVideoUrl() }}">
+                                        Votre navigateur ne supporte pas la lecture video.
+                                    </video>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Détails du produit -->
@@ -128,9 +162,15 @@
                                 </svg>
                                 <h3 class="text-sm font-medium text-blue-600 dark:text-blue-400">Catégorie</h3>
                             </div>
+                            @if($product->category)
+                            <a href="{{ route('categories.show', $product->category->slug) }}" class="text-gray-900 dark:text-gray-100 font-semibold text-lg hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 inline-block">
+                                {{ $product->category->name }}
+                            </a>
+                            @else
                             <p class="text-gray-900 dark:text-gray-100 font-semibold text-lg">
-                                {{ $product->category->name ?? 'Non catégorisé' }}
+                                Non catégorisé
                             </p>
+                            @endif
                         </div>
                         <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-4 border border-green-100 dark:border-green-800">
                             <div class="flex items-center mb-2">

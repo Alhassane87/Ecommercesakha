@@ -17,6 +17,9 @@
                 <option value="{{ $value }}" @selected(old('placement', $campaign->placement ?? '') === $value)>{{ $label }}</option>
             @endforeach
         </select>
+        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Sur `welcome`, les emplacements visibles sont `Accueil - apres hero`, `Accueil - diaporama` et `Accueil - milieu`. Le diaporama demande une image.
+        </p>
     </div>
 
     <div>
@@ -66,6 +69,7 @@
         <input type="datetime-local" name="starts_at"
                value="{{ old('starts_at', isset($campaign?->starts_at) ? $campaign->starts_at->format('Y-m-d\TH:i') : '') }}"
                class="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-3 dark:bg-gray-800 dark:text-white">
+        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Laissez vide pour afficher la pub tout de suite. Horaire applique en UTC.</p>
     </div>
 
     <div>
@@ -73,6 +77,7 @@
         <input type="datetime-local" name="ends_at"
                value="{{ old('ends_at', isset($campaign?->ends_at) ? $campaign->ends_at->format('Y-m-d\TH:i') : '') }}"
                class="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-3 dark:bg-gray-800 dark:text-white">
+        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Laissez vide si la campagne doit rester visible sans date de fin.</p>
     </div>
 
     <div>
@@ -80,17 +85,16 @@
         <input type="number" name="max_impressions_per_session" min="1" max="100"
                value="{{ old('max_impressions_per_session', $campaign->max_impressions_per_session ?? '') }}"
                class="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-3 dark:bg-gray-800 dark:text-white">
+        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">Laissez vide pour ne pas masquer la pub apres plusieurs vues dans la meme session.</p>
     </div>
 
     <div>
-        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Image publicitaire</label>
-        <input type="file" name="image" accept="image/*"
+        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Images publicitaires</label>
+        <input type="file" name="images[]" accept="image/*" multiple
                class="w-full rounded-xl border border-gray-300 dark:border-gray-600 px-4 py-3 dark:bg-gray-800 dark:text-white">
-        @if(!empty($campaign?->image_path))
-            <div class="mt-3">
-                <img src="{{ \Illuminate\Support\Facades\Storage::url($campaign->image_path) }}" alt="{{ $campaign->title }}" class="h-20 rounded-lg border border-gray-200 dark:border-gray-700">
-            </div>
-        @endif
+        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            Vous pouvez ajouter plusieurs images. La premiere image principale sera celle affichee en priorite sur le site.
+        </p>
     </div>
 
     <div class="lg:col-span-2">

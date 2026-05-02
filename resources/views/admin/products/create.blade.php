@@ -195,6 +195,27 @@
             </div>
         </div>
 
+        <!-- SECTION : Video de demonstration -->
+        <div>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                <i class="fas fa-video text-rose-500"></i>
+                Video de demonstration
+            </h2>
+
+            <div class="border border-gray-200 rounded-xl p-5 bg-gray-50">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Ajouter une video qui montre comment utiliser le produit</label>
+                <input type="file" name="usage_video" accept="video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.mov,.webm,.ogg,.m4v"
+                       class="block w-full text-sm text-gray-500
+                              file:mr-4 file:py-2 file:px-4
+                              file:rounded-lg file:border-0
+                              file:bg-rose-50 file:text-rose-700
+                              hover:file:bg-rose-100">
+                <p class="text-xs text-gray-500 mt-3">
+                    Formats acceptes : MP4, MOV, WEBM, OGG, M4V - max 50 Mo. Cette video sera visible sur la fiche produit pour aider le client.
+                </p>
+            </div>
+        </div>
+
         <!-- SECTION : Description -->
         <div>
             <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">

@@ -129,8 +129,40 @@
                                 <input type="file" 
                                        name="images[]" 
                                        multiple 
-                                       accept="image/*,.heic,.heif,.avif" 
-                                       class="w-full border border-gray-300 rounded-xl px-4 py-3 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 transition">
+                                        accept="image/*,.heic,.heif,.avif" 
+                                        class="w-full border border-gray-300 rounded-xl px-4 py-3 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 transition">
+                            </div>
+
+                            <!-- Video de demonstration -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2 flex items-center">
+                                    <i class="fas fa-video text-rose-600 mr-2"></i>
+                                    Video de demonstration
+                                </label>
+
+                                @if($product->hasUsageVideo())
+                                    <div class="rounded-2xl border border-rose-100 bg-rose-50/60 p-4 mb-4">
+                                        <video controls preload="metadata" class="w-full rounded-xl bg-black shadow-md">
+                                            <source src="{{ $product->getUsageVideoUrl() }}">
+                                            Votre navigateur ne supporte pas la lecture video.
+                                        </video>
+                                        <label class="mt-3 inline-flex items-center gap-2 text-sm font-medium text-gray-700">
+                                            <input type="checkbox" name="remove_usage_video" value="1" class="rounded border-gray-300 text-rose-600 focus:ring-rose-500">
+                                            Supprimer la video actuelle
+                                        </label>
+                                    </div>
+                                @endif
+
+                                <input type="file"
+                                       name="usage_video"
+                                       accept="video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.mov,.webm,.ogg,.m4v"
+                                       class="w-full border border-gray-300 rounded-xl px-4 py-3 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100 transition">
+                                <p class="hidden text-xs text-gray-500 mt-2" aria-hidden="true">
+                                    Ajoutez une nouvelle video pour remplacer l’actuelle ou laissez vide pour la conserver.
+                                </p>
+                                <p class="text-xs text-gray-500 mt-2">
+                                    Ajoutez une nouvelle video pour remplacer l'actuelle ou laissez vide pour la conserver.
+                                </p>
                             </div>
                         </div>
 

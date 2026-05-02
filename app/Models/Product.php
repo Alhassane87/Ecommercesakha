@@ -15,6 +15,7 @@ class Product extends Model
         'name', 
         'slug', 
         'description', 
+        'usage_video_path',
         'sku', 
         'price', 
         'stock',
@@ -76,6 +77,20 @@ class Product extends Model
         }
 
         return Storage::url($mainImage->path);
+    }
+
+    public function getUsageVideoUrl(): ?string
+    {
+        if (empty($this->usage_video_path)) {
+            return null;
+        }
+
+        return Storage::url($this->usage_video_path);
+    }
+
+    public function hasUsageVideo(): bool
+    {
+        return !empty($this->usage_video_path);
     }
 
     public function hasImages()

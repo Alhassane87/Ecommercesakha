@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class AdCampaign extends Model
 {
@@ -87,6 +89,32 @@ class AdCampaign extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    public function images(): HasMany
+    {
+        return $this->hasMany(AdCampaignImage::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function galleryImagePaths(): Collection
+    {
+        $paths = $this->relationLoaded('images')
+            ? $this->images->pluck('path')
+            : $this->images()->pluck('path');
+
+        if (!empty($this->image_path) && !$paths->contains($this->image_path)) {
+            $paths = collect([$this->image_path])->concat($paths);
+        }
+
+        return $paths
+            ->filter(fn (?string $path) => !empty($path))
+            ->unique()
+            ->values();
+    }
+
+    public function primaryImagePath(): ?string
+    {
+        return $this->galleryImagePaths()->first();
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true)
@@ -111,6 +139,43 @@ class AdCampaign extends Model
     public function scopeForPlacement($query, string $placement)
     {
         return $query->where('placement', $placement);
+    }
+
+    public function diffusionStatus(): string
+    {
+        if (!$this->is_active) {
+            return 'inactive';
+        }
+
+        if ($this->starts_at && $this->starts_at->isFuture()) {
+            return 'scheduled';
+        }
+
+        if ($this->ends_at && $this->ends_at->isPast()) {
+            return 'expired';
+        }
+
+        return 'running';
+    }
+
+    public function diffusionStatusLabel(): string
+    {
+        return match ($this->diffusionStatus()) {
+            'inactive' => 'Desactivee',
+            'scheduled' => 'Programmee',
+            'expired' => 'Expiree',
+            default => 'En diffusion',
+        };
+    }
+
+    public function diffusionStatusClasses(): string
+    {
+        return match ($this->diffusionStatus()) {
+            'inactive' => 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200',
+            'scheduled' => 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200',
+            'expired' => 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200',
+            default => 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200',
+        };
     }
 
     public function getCtrAttribute(): float

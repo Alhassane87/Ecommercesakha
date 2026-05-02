@@ -38,12 +38,16 @@
                             <td class="px-4 py-3">
                                 <div class="font-semibold text-gray-900 dark:text-white">{{ $campaign->title }}</div>
                                 <div class="text-xs text-gray-500">Priorite: {{ $campaign->priority }}</div>
+                                <div class="text-xs text-gray-500">
+                                    Images: {{ max((int) $campaign->images_count, !empty($campaign->image_path) ? 1 : 0) }}
+                                </div>
                             </td>
                             <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ \App\Models\AdCampaign::placementOptions()[$campaign->placement] ?? $campaign->placement }}</td>
                             <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ \App\Models\AdCampaign::audienceOptions()[$campaign->audience] ?? $campaign->audience }}</td>
                             <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
                                 <div>{{ $campaign->starts_at?->format('d/m/Y H:i') ?? 'Immediate' }}</div>
                                 <div>{{ $campaign->ends_at?->format('d/m/Y H:i') ?? 'Sans fin' }}</div>
+                                <div class="text-xs text-gray-500 mt-1">Fuseau app: UTC</div>
                             </td>
                             <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
                                 <div>Imp: {{ number_format($campaign->impressions) }}</div>
@@ -51,10 +55,17 @@
                                 <div>CTR: {{ number_format($campaign->ctr, 2) }}%</div>
                             </td>
                             <td class="px-4 py-3">
-                                @if($campaign->is_active)
-                                    <span class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200 px-2 py-1 text-xs font-semibold">Active</span>
-                                @else
-                                    <span class="inline-flex items-center rounded-full bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 px-2 py-1 text-xs font-semibold">Inactive</span>
+                                <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold {{ $campaign->diffusionStatusClasses() }}">
+                                    {{ $campaign->diffusionStatusLabel() }}
+                                </span>
+                                @if($campaign->diffusionStatus() === 'scheduled')
+                                    <div class="mt-1 text-xs text-amber-700 dark:text-amber-200">
+                                        Visible a partir du {{ $campaign->starts_at?->format('d/m/Y H:i') }}
+                                    </div>
+                                @elseif($campaign->diffusionStatus() === 'expired')
+                                    <div class="mt-1 text-xs text-rose-700 dark:text-rose-200">
+                                        Finie le {{ $campaign->ends_at?->format('d/m/Y H:i') }}
+                                    </div>
                                 @endif
                             </td>
                             <td class="px-4 py-3">

@@ -15,6 +15,7 @@ class AdCampaignService
         $safeLimit = max(1, $limit);
 
         $query = AdCampaign::query()
+            ->with('images')
             ->forPlacement($placement)
             ->active()
             ->forAudience(Auth::check())
@@ -42,13 +43,25 @@ class AdCampaignService
             return $count < (int) $campaign->max_impressions_per_session;
         })->take($safeLimit)->values();
 
+        $usedSessionCapFallback = false;
+
+        // Keep placements populated when every active campaign has reached its session cap.
+        // This avoids blank ad areas on pages like welcome when only one campaign exists.
+        if ($visible->isEmpty()) {
+            $visible = $campaigns->take($safeLimit)->values();
+            $usedSessionCapFallback = $visible->isNotEmpty();
+        }
+
         if ($visible->isEmpty()) {
             return $visible;
         }
 
         foreach ($visible as $campaign) {
             $campaign->increment('impressions');
-            $sessionImpressions[$campaign->id] = (int) ($sessionImpressions[$campaign->id] ?? 0) + 1;
+
+            if (!$usedSessionCapFallback) {
+                $sessionImpressions[$campaign->id] = (int) ($sessionImpressions[$campaign->id] ?? 0) + 1;
+            }
         }
 
         if ($session) {

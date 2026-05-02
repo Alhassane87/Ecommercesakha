@@ -135,16 +135,18 @@ class ProductController extends Controller
 
         $adSlides = app(AdCampaignService::class)
             ->campaignsForPlacement(AdCampaign::PLACEMENT_HOME_SLIDESHOW, 8)
-            ->filter(fn (AdCampaign $campaign) => !empty($campaign->image_path))
+            ->filter(fn (AdCampaign $campaign) => $campaign->galleryImagePaths()->isNotEmpty())
             ->values()
-            ->map(function (AdCampaign $campaign) {
-                return [
-                    'path' => $campaign->image_path,
-                    'product_name' => $campaign->title,
-                    'is_ad' => true,
-                    'target_url' => !empty($campaign->target_url) ? route('ads.click', $campaign) : null,
-                    'open_in_new_tab' => (bool) $campaign->open_in_new_tab,
-                ];
+            ->flatMap(function (AdCampaign $campaign) {
+                return $campaign->galleryImagePaths()->map(function (string $path) use ($campaign) {
+                    return [
+                        'path' => $path,
+                        'product_name' => $campaign->title,
+                        'is_ad' => true,
+                        'target_url' => !empty($campaign->target_url) ? route('ads.click', $campaign) : null,
+                        'open_in_new_tab' => (bool) $campaign->open_in_new_tab,
+                    ];
+                });
             })
             ->values();
 
