@@ -12,6 +12,13 @@ env:
 
 php: "8.2"
 
+# ========== SERVICES - POSTGRESQL DATABASE ==========
+services:
+  postgres:
+    type: postgres
+    version: "16"
+    plan: starter
+
 processes:
   - web:
       commands:
@@ -33,6 +40,7 @@ variables:
 deployment:
   on_deploy:
     - "php artisan migrate --force"
+    - "php artisan db:seed --class=AdminUserSeeder"
     - "php artisan optimize:clear"
     - "php artisan config:cache"
     - "php artisan route:cache"

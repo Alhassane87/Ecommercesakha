@@ -68,16 +68,16 @@
 
     $monthlySeries = Order::whereNotIn('status', ['cancelled'])
         ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
-        ->groupByRaw('DATE_FORMAT(created_at, "%Y-%m")')
-        ->orderByRaw('DATE_FORMAT(created_at, "%Y-%m")')
-        ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as m, SUM(total) as total')
+        ->groupByRaw("strftime('%Y-%m', created_at)")
+        ->orderByRaw("strftime('%Y-%m', created_at)")
+        ->selectRaw("strftime('%Y-%m', created_at) as m, SUM(total) as total")
         ->get();
 
     $yearlySeries = Order::whereNotIn('status', ['cancelled'])
         ->where('created_at', '>=', now()->subYears(4)->startOfYear())
-        ->groupByRaw('YEAR(created_at)')
-        ->orderByRaw('YEAR(created_at)')
-        ->selectRaw('YEAR(created_at) as y, SUM(total) as total')
+        ->groupByRaw("strftime('%Y', created_at)")
+        ->orderByRaw("strftime('%Y', created_at)")
+        ->selectRaw("strftime('%Y', created_at) as y, SUM(total) as total")
         ->get();
 @endphp
 
